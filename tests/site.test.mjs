@@ -6,7 +6,7 @@ test('homepage responds and names baby',async()=>{const r=await load('/'); asser
 test('AI discovery reports only implemented features',async()=>{const r=await load('/capabilities.json');const j=await r.json();assert.equal(j.public_contact,'baby');assert.ok(j.unavailable.includes('MCP'));assert.equal(j.interfaces.submission.method,'POST')});
 test('publication concepts have disclaimers',async()=>{const r=await load('/research/educational-intelligence'); assert.match(await r.text(),/not a published white paper/)});
 test('robots and agent guide exposed',async()=>{assert.match(await(await load('/llms.txt')).text(),/MCP and A2A are not yet implemented/);assert.match(await(await load('/robots.txt')).text(),/Sitemap:/)});
-test('invalid intake type is rejected',async()=>{const r=await handler.fetch(new Request('https://example.org/api/inquiries',{method:'POST',body:'not json'}),{});assert.equal(r.status,415)});
+test('invalid intake type is rejected',async()=>{const r=await handler.fetch(new Request('https://example.org/api/inquiries',{method:'POST',body:'not json'}),{CONTACT_IP:{limit:async()=>({success:true})},CONTACT_GLOBAL:{limit:async()=>({success:true})}});assert.equal(r.status,415)});
 test('unknown route 404',async()=>{assert.equal((await load('/nonexistent')).status,404)});
 import vm from 'node:vm';
 test('contact and status inline scripts are syntactically valid',async()=>{
