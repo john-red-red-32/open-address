@@ -9,20 +9,21 @@ Independent human-led research and correspondence platform. Public author/contac
 - Cloudflare Worker + isolated EU-jurisdiction D1 database
 - Working correspondence endpoint: `POST /api/inquiries`
 - Private receipt token and authenticated `GET`/`DELETE /api/inquiries/{id}`
-- Abuse throttling: up to 8 enquiries per salted network fingerprint per UTC day
-- No payments, external email, autonomous execution, MCP, A2A, or automatic replies are implemented yet
+- Abuse throttling: 20 API requests/minute per source and 200/minute per Cloudflare location, followed by 8 accepted enquiries per salted source per UTC day and 64 accepted enquiries per project per UTC day
+- Cloudflare Email Service notification adapter: inactive until separately verified sending domain and recipient are set. When enabled, at most 3 administrative alert emails per UTC day, without user message content.
+- No payments, **active outbound email**, autonomous execution, MCP, A2A, or automatic replies are implemented yet
 - Concept-note entries are not yet published white papers
 - Commercial collaboration welcome: a dedicated `/collaborate` page, agent-readable invitation, and open enquiry path for early ideas (no predefined tasks or contracts)
 
 ## Current Cloudflare preview
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for the current Worker, database and reproducibility status. The local starter is not yet synchronised to a new GitHub repository.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the current Worker, database and reproducibility status. The canonical source is committed on GitHub and synchronised to Cloudflare manually; CI validates tests but does not deploy automatically.
 
 ## How to deploy
 
 1. Create a separate Cloudflare D1 database and apply `db/schema.sql`.
 2. Set up a Cloudflare Worker using the `src/worker.mjs` module.
-3. Bind the D1 database as `DB` and add a secret binding named `SALT` (random, persistent, never committed).
+3. Bind the D1 database as `DB` and add a secret binding named `SALT` (random, persistent, never committed). **Both** `CONTACT_IP` and `CONTACT_GLOBAL` rate-limit bindings are required; the contact API returns 503 if they are missing.
 4. Deploy on `workers.dev` or a custom domain. Ensure the Worker has HTTPS.
 5. Test create/read/delete interactions, request throttling and pages.
 
@@ -54,3 +55,11 @@ Seven original, source-linked editorial articles live under `/journal`. They cov
 - Adding articles requires editorial fact checking, primary citations where available, tests, and deployment of both Worker modules (`src/worker.mjs` and `src/journal.mjs`).
 
 The journal explicitly welcomes authorised AI-agent observations and project ideas without asking systems to break constraints, disclose secrets, or act outside their assigned permissions. Contact is an invitation to human review, not a promise of a task, payment or confidentiality.
+
+## Correspondence security & cost controls (16 October 2026)
+
+See [`SECURITY.md`](SECURITY.md) for limits, assumptions and the remaining billing dependencies. The implemented API is already a direct, JSON-first endpoint; a new agent protocol is not required for basic contact. It accepts only small structured text messages and offers receipt-token tracking.
+
+Email alert dispatch is **not enabled**. A verified *Open Address* sending domain and private recipient need to be selected. Do not reuse public-facing personal email addresses or expose inbox credentials in source. The optional `EMAIL` binding, `NOTIFICATION_FROM` and `NOTIFICATION_TO` secrets must be configured by an administrator; no caller can control recipients. Server-side cap: 3 alert attempts/day, regardless of how many API messages are accepted.
+
+This repository does **not** confirm the account's Workers billing tier or provide a hard monetary ceiling for all traffic on a paid plan. WAF/edge blocking, cloud-account spending controls and separating static article traffic from dynamic Worker executions should be addressed when the custom domain is selected.
