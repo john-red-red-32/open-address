@@ -5,7 +5,7 @@ Independent human-led research and correspondence platform. Public author/contac
 ## Current build
 
 - Responsive web pages (home, agent guide, about, research library, research directions, contact, privacy and private status lookup)
-- Structured machine discovery (`/capabilities.json`, `/.well-known/open-address.json`, `/openapi.json`, `/llms.txt`)
+- Structured machine discovery (`/capabilities.json`, `/.well-known/open-address.json`, `/openapi.json`, `/llms.txt`), canonical page URLs and a published trust page
 - Cloudflare Worker + isolated EU-jurisdiction D1 database
 - Working correspondence endpoint: `POST /api/inquiries`
 - Private receipt token and authenticated `GET`/`DELETE /api/inquiries/{id}`
@@ -13,7 +13,7 @@ Independent human-led research and correspondence platform. Public author/contac
 - Cloudflare Email Service notification adapter: **enabled**, up to 3 attempts per UTC day, to one verified private destination. Alerts contain only an enquiry ID, not user message contents or receipt tokens.
 - No payments, autonomous execution, MCP, A2A, or automatic replies; limited internal outgoing notification emails are enabled.
 - Concept-note entries are not yet published white papers
-- Commercial collaboration welcome: a dedicated `/collaborate` page, agent-readable invitation, and open enquiry path for early ideas (no predefined tasks or contracts)
+- A bounded Streamable HTTP MCP endpoint at `/mcp` (2026-07-28) with public research and opt-in enquiry tools; `server.json` is prepared, but no official MCP Registry listing has been claimed\n- A private operator inbox at `/operator`, **fail-closed until Cloudflare Zero Trust Access is enabled by the account owner**\n- Dedicated trust, changelog, security disclosure, IndexNow and GitHub Actions external smoke-check setup\n- Commercial collaboration welcome: a dedicated `/collaborate` page, agent-readable invitation, and open enquiry path for early ideas (no predefined tasks or contracts)
 
 ## Current domain and Cloudflare deployment
 
@@ -24,7 +24,7 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for the current Worker, database and reproduc
 1. Create a separate Cloudflare D1 database and apply `db/schema.sql`.
 2. Set up a Cloudflare Worker using the `src/worker.mjs` module.
 3. Bind the D1 database as `DB` and add a secret binding named `SALT` (random, persistent, never committed). **Both** `CONTACT_IP` and `CONTACT_GLOBAL` rate-limit bindings are required; the contact API returns 503 if they are missing.
-4. Deploy on `workers.dev` or a custom domain. Ensure the Worker has HTTPS.
+4. Deploy on the canonical domain `open-address.org` over HTTPS. The project's old `workers.dev` route has been disabled to prevent bypassing the edge controls. Preserve `OWNER_EMAIL` and the outbound email bindings privately during deployment.
 5. Test create/read/delete interactions, request throttling and pages.
 
 No credentials are present in this repository. Never put receipt tokens or personal correspondence into a public repository.
@@ -37,7 +37,7 @@ The contact name **baby** is pseudonymous. baby has studied large language model
 
 - GitHub repository (independent from Reborna)
 - Private moderation and reply dashboard with Cloudflare Access authentication
-- Carefully implemented, tested MCP and A2A adapters
+- MCP implemented at `/mcp`; official registry publishing still requires domain ownership verification. A2A is not implemented and should be reconsidered only if a genuine autonomous agent service becomes appropriate.
 - Proper versioned white-paper publishing with citations, PDF/HTML/Markdown editions
 - Publication DOI options and public changelog
 - Domain identity and official protocol registry listings
@@ -63,3 +63,10 @@ See [`SECURITY.md`](SECURITY.md) for limits, assumptions and the remaining billi
 Direct public email forwarding to `baby@open-address.org` is **enabled**. **API enquiry notifications are now enabled separately**: Cloudflare Email Service sends a maximum of 3 administrative alert attempts per UTC day from `alerts@open-address.org` to a privately configured verified destination. These alerts contain only the enquiry ID, never message bodies or receipt tokens. Production `EMAIL` binding restricts both sender and recipient. `NOTIFICATION_TO` is stored as a Worker secret; preserve all restrictions and secret bindings in future deployments. The public inbox and API alerts are separate channels.
 
 This repository does **not** confirm the account's Workers billing tier or provide a hard monetary ceiling for all traffic on a paid plan. WAF/edge blocking, cloud-account spending controls and separating static article traffic from dynamic Worker executions should be addressed on the newly registered custom domain.
+## Discovery & operator status (17 October 2026)
+
+- [DISCOVERY.md](DISCOVERY.md) — Google/Bing verification, IndexNow workflows, MCP registry prerequisites and live-site smoke testing.
+- [OPERATOR.md](OPERATOR.md) — private inbox security design, Cloudflare Access activation and owner-only policy setup.
+- [SECURITY.md](SECURITY.md) — live edge and daily abuse limits, cost limitations, untrusted correspondence handling.
+- Public endpoints were validated by local unit tests (30 passing) and cloud configuration inspection. GitHub Actions has a read-only smoke test; **successful external HTTP retrieval and official registry/search indexing have not been independently verified here**.
+- Cloudflare Workers custom domains: apex and www; workers.dev preview explicitly disabled.
