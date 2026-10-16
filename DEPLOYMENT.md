@@ -3,8 +3,8 @@
 The application is deployed as Cloudflare Worker `open-address` in the existing Cloudflare account. The production custom domain was registered and attached on 16 October 2026.
 
 - Canonical address: https://open-address.org/
-- Legacy preview: https://open-address.hi-1ff.workers.dev/
-- Worker public subdomain: enabled
+- Former legacy preview: https://open-address.hi-1ff.workers.dev/ (**disabled**)
+- Worker public workers.dev subdomain: **disabled**
 - Cloudflare D1 database: `open-address-correspondence` (EU jurisdiction)
 - Database ID: `8ce4967d-3b63-4e30-b215-742006e8e9b2`
 - Active bindings: `DB` (D1 database), `SALT` (deployment-only random salt, **not committed**), `CONTACT_IP` (20/minute per source per Cloudflare location), `CONTACT_GLOBAL` (200/minute per location)
@@ -34,3 +34,14 @@ No Reborna repository, Worker, Pages project or database was modified as part of
 - **baby** is the human steward; University of Cambridge (ICE) continuing education in large language models and machine learning is disclosed without claiming a degree or institutional endorsement. **edward** is named AI-assisted research and development collaborator, not an autonomous email or website manager.
 - A direct one-off Cloudflare Email Service sending test from `alerts@open-address.org` to the verified private destination returned `delivered`, distinct from end-to-end submission-to-notification confirmation.
 - The production Cloudflare Worker `open-address` has `EMAIL`, restricted sender and destination allowlists, `NOTIFICATION_FROM` and private `NOTIFICATION_TO` (secret_text) alongside DB/SALT/rate-limit bindings. GitHub Worker and journal modules match the uploaded production sources.
+
+## 17 October 2026 · trust, protocols and security release
+
+- Production code now uses four Cloudflare Worker modules: `src/worker.mjs`, `src/journal.mjs`, `src/operator.mjs` and `src/mcp.mjs`. All module contents were compared with Cloudflare script download and matched.
+- Added canonical page URLs, `/trust`, `/changelog`, `/.well-known/security.txt`, a machine-readable MCP interface on `/mcp` (2026-07-28), and dedicated owner-only inbox code on `/operator`.
+- **Inbox not yet user-accessible:** Zero Trust Access is not enabled for the account, so the server correctly refuses all operator access even if the private email secret is present. Access setup is documented in `OPERATOR.md` and requires owner interaction.
+- `/mcp` advertises three bounded tools (`get_contact`, `list_research`, `submit_inquiry`) and reuses the same database and email quotas as the REST API. No official MCP Registry publication is claimed; `server.json` is prepared for the owner-authenticated listing process.
+- Cloudflare zone rate-limit rule enabled for POST `/api/inquiries` and `/mcp` at both apex and www (12 requests/10s/IP/colo, 10s mitigation), ahead of Worker execution; original Worker and D1 caps remain unchanged.
+- `www.open-address.org` also routes to the Worker and redirects to the apex host. Disabled the old worker preview subdomain to reduce unprotected cost exposure.
+- Added IndexNow key-file route, automated GitHub Actions submission workflow, and GitHub Actions read-only live-site smoke tests. Actual submission outcomes and external live HTTP compatibility have not been verified from this session.
+- Local tests: **30 passed**. Search Console/Bing verification and Cloudflare Zero Trust Access activation still require user-owned account authorisation. No claim of indexing or registry status until verified.
