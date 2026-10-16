@@ -17,3 +17,18 @@ test('contact and status inline scripts are syntactically valid',async()=>{
    for(const s of js)assert.doesNotThrow(()=>new vm.Script(s),path+' contains invalid inline JavaScript');
  }
 });
+
+test('commercial collaboration is available to humans and agents without a task catalogue',async()=>{
+  for(const path of ['/', '/for-agents', '/collaborate', '/contact', '/about']) {
+    const r=await load(path);assert.equal(r.status,200,path);
+    const html=await r.text();assert.match(html,/collaborat/i,path);
+  }
+  const cap=await(await load('/capabilities.json')).json();
+  assert.equal(cap.collaboration.commercial,'open_to_exploration');
+  assert.equal(cap.collaboration.agreement_on_contact,false);
+  assert.ok(cap.capabilities.some(x=>/commercial/i.test(x)));
+  const api=await(await load('/openapi.json')).json();
+  assert.match(api.paths['/api/inquiries'].post.description,/does not create a contract/);
+  assert.match(await(await load('/llms.txt')).text(),/Commercial partnerships and speculative ideas/);
+  assert.match(await(await load('/sitemap.xml')).text(),/\/collaborate/);
+});
