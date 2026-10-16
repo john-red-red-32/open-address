@@ -31,6 +31,6 @@ No Reborna repository, Worker, Pages project or database was modified as part of
 
 ## October 16 operator identity and email verification
 
-- **baby** is the human steward; University of Cambridge ICE continuing education in large language models and machine learning is disclosed without claiming a degree or institutional endorsement. **edward** is named AI-assisted research and development collaborator, not an autonomous email or website manager.
+- **baby** is the human steward; University of Cambridge (ICE) continuing education in large language models and machine learning is disclosed without claiming a degree or institutional endorsement. **edward** is named AI-assisted research and development collaborator, not an autonomous email or website manager.
 - A direct one-off Cloudflare Email Service sending test from `alerts@open-address.org` to the verified private destination returned `delivered`, distinct from end-to-end submission-to-notification confirmation.
 - The production Cloudflare Worker `open-address` has `EMAIL`, restricted sender and destination allowlists, `NOTIFICATION_FROM` and private `NOTIFICATION_TO` (secret_text) alongside DB/SALT/rate-limit bindings. GitHub Worker and journal modules match the uploaded production sources.
