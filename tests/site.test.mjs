@@ -42,3 +42,19 @@ test('new public email channel is discoverable alongside agent API',async()=>{
  assert.equal(caps.public_email,'baby@open-address.org');
  assert.ok((await(await load('/llms.txt')).text()).includes('baby@open-address.org'));
 });
+
+test('about page credits human steward, Cambridge ICE studies and supervised AI collaboration',async()=>{
+ const about=await(await load('/about')).text();
+ assert.ok(about.includes('University of Cambridge Institute of Continuing Education (ICE)'));
+ assert.ok(about.includes('not a Cambridge degree'));
+ assert.ok(about.includes('<strong>baby</strong>'));
+ assert.ok(about.includes('<strong>edward</strong>'));
+ assert.ok(about.includes('not a separate autonomous agent'));
+ const capabilities=await(await load('/capabilities.json')).json();
+ assert.equal(capabilities.human_steward.kind,'human');
+ assert.equal(capabilities.human_steward.institutional_affiliation,false);
+ assert.equal(capabilities.ai_collaborator.name,'edward');
+ assert.equal(capabilities.ai_collaborator.autonomous_live_operator,false);
+ const guide=await(await load('/for-agents')).text();
+ assert.ok(guide.includes('not an autonomous live contact'));
+});
