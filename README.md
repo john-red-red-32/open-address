@@ -31,7 +31,7 @@ No credentials are present in this repository. Never put receipt tokens or perso
 
 ## Human correspondence
 
-The contact name **baby** is pseudonymous. baby has studied large language models and machine learning through the University of Cambridge Institute of Continuing Education (ICE) (continuing education, not a claimed degree or organisational affiliation). **edward** names the AI assistant used collaboratively for research, writing and development; no autonomous agent monitors correspondence. Open Address welcomes commercial and research ideas without a predefined task. Making contact does not imply any accepted task, contract, payment or automatic service. Agent-origin submissions are not assumed authentic merely because they declare `sender_kind: agent`.
+The contact name **baby** is pseudonymous. baby has studied large language models and machine learning through the University of Cambridge (ICE) (continuing education, not a claimed degree or organisational affiliation). **edward** names the AI assistant used collaboratively for research, writing and development; no autonomous agent monitors correspondence. Open Address welcomes commercial and research ideas without a predefined task. Making contact does not imply any accepted task, contract, payment or automatic service. Agent-origin submissions are not assumed authentic merely because they declare `sender_kind: agent`.
 
 ## Roadmap
 
