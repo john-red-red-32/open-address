@@ -10,8 +10,8 @@ Independent human-led research and correspondence platform. Public author/contac
 - Working correspondence endpoint: `POST /api/inquiries`
 - Private receipt token and authenticated `GET`/`DELETE /api/inquiries/{id}`
 - Abuse throttling: 20 API requests/minute per source and 200/minute per Cloudflare location, followed by 8 accepted enquiries per salted source per UTC day and 64 accepted enquiries per project per UTC day
-- Cloudflare Email Service notification adapter: inactive until separately verified sending domain and recipient are set. When enabled, at most 3 administrative alert emails per UTC day, without user message content.
-- No payments, **active outbound email**, autonomous execution, MCP, A2A, or automatic replies are implemented yet
+- Cloudflare Email Service notification adapter: **enabled**, up to 3 attempts per UTC day, to one verified private destination. Alerts contain only an enquiry ID, not user message contents or receipt tokens.
+- No payments, autonomous execution, MCP, A2A, or automatic replies; limited internal outgoing notification emails are enabled.
 - Concept-note entries are not yet published white papers
 - Commercial collaboration welcome: a dedicated `/collaborate` page, agent-readable invitation, and open enquiry path for early ideas (no predefined tasks or contracts)
 
@@ -31,7 +31,7 @@ No credentials are present in this repository. Never put receipt tokens or perso
 
 ## Human correspondence
 
-The contact name **baby** is pseudonymous. Open Address welcomes commercial and research ideas without a predefined task. Making contact does not imply any accepted task, contract, payment or automatic service. Agent-origin submissions are not assumed authentic merely because they declare `sender_kind: agent`.
+The contact name **baby** is pseudonymous. baby has studied large language models and machine learning through the University of Cambridge Institute of Continuing Education (ICE) (continuing education, not a claimed degree or organisational affiliation). **edward** names the AI assistant used collaboratively for research, writing and development; no autonomous agent monitors correspondence. Open Address welcomes commercial and research ideas without a predefined task. Making contact does not imply any accepted task, contract, payment or automatic service. Agent-origin submissions are not assumed authentic merely because they declare `sender_kind: agent`.
 
 ## Roadmap
 
@@ -60,6 +60,6 @@ The journal explicitly welcomes authorised AI-agent observations and project ide
 
 See [`SECURITY.md`](SECURITY.md) for limits, assumptions and the remaining billing dependencies. The implemented API is already a direct, JSON-first endpoint; a new agent protocol is not required for basic contact. It accepts only small structured text messages and offers receipt-token tracking.
 
-Direct public email forwarding to `baby@open-address.org` is **enabled** through Cloudflare Email Routing, but that is separate from API enquiry notifications. Email alert dispatch for API submissions is **not enabled**. A verified *Open Address* sending domain and private recipient need to be selected. Do not reuse public-facing personal email addresses or expose inbox credentials in source. The optional `EMAIL` binding, `NOTIFICATION_FROM` and `NOTIFICATION_TO` secrets must be configured by an administrator; no caller can control recipients. Server-side cap: 3 alert attempts/day, regardless of how many API messages are accepted.
+Direct public email forwarding to `baby@open-address.org` is **enabled**. **API enquiry notifications are now enabled separately**: Cloudflare Email Service sends a maximum of 3 administrative alert attempts per UTC day from `alerts@open-address.org` to a privately configured verified destination. These alerts contain only the enquiry ID, never message bodies or receipt tokens. Production `EMAIL` binding restricts both sender and recipient. `NOTIFICATION_TO` is stored as a Worker secret; preserve all restrictions and secret bindings in future deployments. The public inbox and API alerts are separate channels.
 
 This repository does **not** confirm the account's Workers billing tier or provide a hard monetary ceiling for all traffic on a paid plan. WAF/edge blocking, cloud-account spending controls and separating static article traffic from dynamic Worker executions should be addressed on the newly registered custom domain.
