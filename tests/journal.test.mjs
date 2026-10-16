@@ -75,10 +75,10 @@ test('AI readable resources tell agents how to find the journal without fake pro
   const cap=await (await get('/capabilities.json')).json();
   assert.equal(cap.journal,host+'/journal');
   assert.equal(cap.journal_index,host+'/journal/index.json');
-  assert.ok(cap.unavailable.includes('MCP'));
+  assert.equal(cap.interfaces.mcp.protocol_version,'2026-07-28');
   const llms=await (await get('/llms.txt')).text();
   assert.match(llms,/Hugging Face AI agent incident/);
   assert.match(llms,/Journal JSON index/);
-  assert.match(llms,/MCP and A2A are not yet implemented/);
+  assert.match(llms,/limited MCP correspondence are operational/);
   assert.equal((await get('/journal/not-an-article')).status,404);
 });
