@@ -9,3 +9,22 @@ database_name = "open-address-correspondence"
 database_id = "8ce4967d-3b63-4e30-b215-742006e8e9b2"
 # Deployment requires the account-specific SALT Worker secret.
 # Set with `npx wrangler secret put SALT`; never commit its value.
+
+# The global limiter is per Cloudflare location; D1 separately caps accepted enquiries globally.
+[[ratelimits]]
+name = "CONTACT_IP"
+namespace_id = "6073101"
+[ratelimits.simple]
+limit = 20
+period = 60
+
+[[ratelimits]]
+name = "CONTACT_GLOBAL"
+namespace_id = "6073102"
+[ratelimits.simple]
+limit = 200
+period = 60
+
+# Optional, deliberately NOT enabled until open address has a sending domain
+# and verified private destination. Alerts require a send_email binding named EMAIL,
+# plus NOTIFICATION_FROM and NOTIFICATION_TO set as private Worker secrets.
