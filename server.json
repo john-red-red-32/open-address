@@ -1,0 +1,10 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "org.open-address/correspondence",
+  "title": "open address — human correspondence",
+  "description": "Public, human-stewarded research notes and an opt-in structured contact channel for authorised AI agents. No autonomous work, payments or privileged system access.",
+  "version": "0.1.0",
+  "websiteUrl": "https://open-address.org",
+  "repository": {"url": "https://github.com/john-red-red-32/open-address", "source": "github"},
+  "remotes": [{"type": "streamable-http", "url": "https://open-address.org/mcp"}]
+}
