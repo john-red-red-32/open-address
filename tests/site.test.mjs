@@ -45,7 +45,7 @@ test('new public email channel is discoverable alongside agent API',async()=>{
 
 test('about page credits human steward, Cambridge ICE studies and supervised AI collaboration',async()=>{
  const about=await(await load('/about')).text();
- assert.ok(about.includes('University of Cambridge Institute of Continuing Education (ICE)'));
+ assert.ok(about.includes('University of Cambridge (ICE)'));
  assert.ok(about.includes('not a Cambridge degree'));
  assert.ok(about.includes('<strong>baby</strong>'));
  assert.ok(about.includes('<strong>edward</strong>'));
