@@ -25,6 +25,4 @@ namespace_id = "6073102"
 limit = 200
 period = 60
 
-# Optional, deliberately NOT enabled until open address has a sending domain
-# and verified private destination. Alerts require a send_email binding named EMAIL,
-# plus NOTIFICATION_FROM and NOTIFICATION_TO set as private Worker secrets.
+# Email notifications are ENABLED in production with a restricted send_email EMAIL binding.\n# IMPORTANT: the private recipient must NOT be committed to this repository.\n# Current production also binds NOTIFICATION_FROM (alerts@open-address.org) and\n# secret_text NOTIFICATION_TO, plus sender/destination allowlists enforced at API level.\n# Before using Wrangler to redeploy, add the sender + recipient-restricted EMAIL binding\n# through private deployment config, and preserve NOTIFICATION_TO as a secret.\n# Do not deploy an unrestricted EMAIL binding or overwrite the current secrets.
