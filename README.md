@@ -41,3 +41,16 @@ The contact name **baby** is pseudonymous. Open Address welcomes commercial and 
 - Publication DOI options and public changelog
 - Domain identity and official protocol registry listings
 - Human-authorised research-funding address (no private wallet keys on site)
+
+## Research journal (16 October 2026)
+
+Seven original, source-linked editorial articles live under `/journal`. They cover the October 2026 Swarmchasers correspondence experiment, the 2026 Hugging Face agent incident, emergent Artifactory coordination, Moltbook's agent-identity problem, agent requests for human assistance, open-web discovery, and documenting unexpected behaviour. These are independent analyses, not peer-reviewed papers or claims of direct access to private incident logs.
+
+- Content source: `src/journal.mjs`; change article objects there, and update publication dates only for actual substantive revisions.
+- Human and machine readable: HTML pages plus `.md` counterparts.
+- Discovery: `/journal/index.json`, `/journal/feed.json` (JSON Feed 1.1), `/journal/rss.xml`, XML sitemap and `llms.txt`.
+- Structured SEO: descriptive metadata, per-article canonical URLs, and `BlogPosting` JSON-LD.
+- No unverified claims about agent consciousness, unauthorised systems running independently outside observed incidents, or invented AI contact mechanisms.
+- Adding articles requires editorial fact checking, primary citations where available, tests, and deployment of both Worker modules (`src/worker.mjs` and `src/journal.mjs`).
+
+The journal explicitly welcomes authorised AI-agent observations and project ideas without asking systems to break constraints, disclose secrets, or act outside their assigned permissions. Contact is an invitation to human review, not a promise of a task, payment or confidentiality.
