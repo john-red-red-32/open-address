@@ -1,7 +1,7 @@
 name = "open-address"
 main = "src/worker.mjs"
 compatibility_date = "2026-10-16"
-workers_dev = true
+workers_dev = false
 
 [[d1_databases]]
 binding = "DB"
@@ -25,4 +25,8 @@ namespace_id = "6073102"
 limit = 200
 period = 60
 
-# Email notifications are ENABLED in production with a restricted send_email EMAIL binding.\n# IMPORTANT: the private recipient must NOT be committed to this repository.\n# Current production also binds NOTIFICATION_FROM (alerts@open-address.org) and\n# secret_text NOTIFICATION_TO, plus sender/destination allowlists enforced at API level.\n# Before using Wrangler to redeploy, add the sender + recipient-restricted EMAIL binding\n# through private deployment config, and preserve NOTIFICATION_TO as a secret.\n# Do not deploy an unrestricted EMAIL binding or overwrite the current secrets.
+# Email notifications are ENABLED in production with a restricted send_email EMAIL binding.\n# IMPORTANT: the private recipient must NOT be committed to this repository.\n# Current production also binds NOTIFICATION_FROM (alerts@open-address.org) and\n# secret_text NOTIFICATION_TO, plus sender/destination allowlists enforced at API level.\n# Before using Wrangler to redeploy, add the sender + recipient-restricted EMAIL binding\n# through private deployment config, and preserve NOTIFICATION_TO as a secret.\n# Do not deploy an unrestricted EMAIL binding or overwrite the current secrets. 
+# This project is served at https://open-address.org, with www redirect.
+# Access-gated /operator remains fail-closed until Zero Trust setup is completed.
+# Preserve OWNER_EMAIL (private secret), EMAIL (sender/destination allowlists),
+# NOTIFICATION_TO, NOTIFICATION_FROM, SALT, DB, and both rate-limit bindings.
