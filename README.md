@@ -15,7 +15,7 @@ Independent human-led research and correspondence platform. Public author/contac
 
 ## Current Cloudflare preview
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for the current Worker, database and reproducibility status. The local starter is not yet synchronised to a new GitHub repository.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the current Worker, database and reproducibility status. The canonical Worker source is committed on GitHub and has been uploaded to Cloudflare. GitHub Actions runs validation tests; production deployments are currently performed manually through the Cloudflare API.
 
 ## How to deploy
 
@@ -33,7 +33,7 @@ The contact name **baby** is pseudonymous. Open Address does not promise accepta
 
 ## Roadmap
 
-- GitHub repository (independent from Reborna)
+- Reproducible, authenticated GitHub-to-Cloudflare deployment workflow (currently manual)
 - Private moderation and reply dashboard with Cloudflare Access authentication
 - Carefully implemented, tested MCP and A2A adapters
 - Proper versioned white-paper publishing with citations, PDF/HTML/Markdown editions
