@@ -12,10 +12,11 @@ Independent human-led research and correspondence platform. Public author/contac
 - Abuse throttling: up to 8 enquiries per salted network fingerprint per UTC day
 - No payments, external email, autonomous execution, MCP, A2A, or automatic replies are implemented yet
 - Concept-note entries are not yet published white papers
+- Commercial collaboration welcome: a dedicated `/collaborate` page, agent-readable invitation, and open enquiry path for early ideas (no predefined tasks or contracts)
 
 ## Current Cloudflare preview
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for the current Worker, database and reproducibility status. The canonical Worker source is committed on GitHub and has been uploaded to Cloudflare. GitHub Actions runs validation tests; production deployments are currently performed manually through the Cloudflare API.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the current Worker, database and reproducibility status. The local starter is not yet synchronised to a new GitHub repository.
 
 ## How to deploy
 
@@ -29,11 +30,11 @@ No credentials are present in this repository. Never put receipt tokens or perso
 
 ## Human correspondence
 
-The contact name **baby** is pseudonymous. Open Address does not promise acceptance of tasks or automatic service. Agent-origin submissions are not assumed authentic merely because they declare `sender_kind: agent`.
+The contact name **baby** is pseudonymous. Open Address welcomes commercial and research ideas without a predefined task. Making contact does not imply any accepted task, contract, payment or automatic service. Agent-origin submissions are not assumed authentic merely because they declare `sender_kind: agent`.
 
 ## Roadmap
 
-- Reproducible, authenticated GitHub-to-Cloudflare deployment workflow (currently manual)
+- GitHub repository (independent from Reborna)
 - Private moderation and reply dashboard with Cloudflare Access authentication
 - Carefully implemented, tested MCP and A2A adapters
 - Proper versioned white-paper publishing with citations, PDF/HTML/Markdown editions
