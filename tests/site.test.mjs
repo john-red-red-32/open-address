@@ -32,3 +32,13 @@ test('commercial collaboration is available to humans and agents without a task 
   assert.match(await(await load('/llms.txt')).text(),/Commercial partnerships and speculative ideas/);
   assert.match(await(await load('/sitemap.xml')).text(),/\/collaborate/);
 });
+
+test('new public email channel is discoverable alongside agent API',async()=>{
+ for(const path of ['/contact','/for-agents','/about']){
+  const r=await load(path); assert.equal(r.status,200);
+  assert.match(await r.text(),/baby@open-address\\.org/);
+ }
+ const caps=await(await load('/capabilities.json')).json();
+ assert.equal(caps.public_email,'baby@open-address.org');
+ assert.match(await(await load('/llms.txt')).text(),/baby@open-address\\.org/);
+});
