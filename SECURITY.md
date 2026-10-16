@@ -31,3 +31,11 @@ Cloudflare Email Service is now configured with the project's sender (`alerts@op
 6. Add database retention/cleanup policy for daily-limit fingerprints and future archival; avoid deleting research correspondence without defining retention.
 
 No test, deployment, or application rule can guarantee that a malicious distributed request flood will not incur usage on a metered account. Safeguards contain storage/email use, not the underlying bandwidth cost of every rejected request.
+## Canonical-domain protections (17 October 2026)
+
+- Cloudflare **zone edge WAF rate-limit rule enabled** for POST `/api/inquiries` and POST `/mcp` on both apex and www: 12 requests per 10 seconds per IP and Cloudflare location, blocking for 10 seconds. Cloudflare free-plan entitlements determined these window values; this is not a global cap.
+- The old `open-address.hi-1ff.workers.dev` hostname is disabled, removing the alternate route that would bypass zone-level edge rules.
+- Worker contact limits (20 requests/minute per IP, 200/minute/location) and atomic D1 ceilings (8 accepted/IP/day, 64 globally/day) remain active; email alerts are capped at 3/day. Security controls do not prove a strict spending cap on a metered Workers account.
+- Operator endpoints (`/operator` and `/operator/api/…`) require `ctx.access.getIdentity()` and an exact match to the private `OWNER_EMAIL` secret, with same-origin requirements for mutations. The account does **not** currently have Cloudflare Zero Trust Access activated: therefore, the inbox is intentionally inaccessible and returns 403. See [OPERATOR.md](OPERATOR.md) for the one-time setup step.
+- MCP is public but deliberately narrow: research and contact descriptions plus one authorised human-enquiry submission tool. It applies the same anti-abuse and D1 acceptance checks. Agent-provided text is untrusted and never interpreted as instructions.
+- External live-client verification and end-to-end email delivery on a real accepted enquiry remain outstanding; test safely before publicity.
