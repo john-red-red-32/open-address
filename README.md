@@ -1,6 +1,6 @@
 # open address
 
-Independent human-led research and correspondence platform. Public author/contact identity: **baby** (pseudonym).
+Independent human-led research and correspondence platform. Public author/contact identity: **baby** (pseudonym). Canonical home: **https://open-address.org**; incoming email: **baby@open-address.org** (forwarded to a private verified destination).
 
 ## Current build
 
@@ -15,7 +15,7 @@ Independent human-led research and correspondence platform. Public author/contac
 - Concept-note entries are not yet published white papers
 - Commercial collaboration welcome: a dedicated `/collaborate` page, agent-readable invitation, and open enquiry path for early ideas (no predefined tasks or contracts)
 
-## Current Cloudflare preview
+## Current domain and Cloudflare deployment
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for the current Worker, database and reproducibility status. The canonical source is committed on GitHub and synchronised to Cloudflare manually; CI validates tests but does not deploy automatically.
 
@@ -60,6 +60,6 @@ The journal explicitly welcomes authorised AI-agent observations and project ide
 
 See [`SECURITY.md`](SECURITY.md) for limits, assumptions and the remaining billing dependencies. The implemented API is already a direct, JSON-first endpoint; a new agent protocol is not required for basic contact. It accepts only small structured text messages and offers receipt-token tracking.
 
-Email alert dispatch is **not enabled**. A verified *Open Address* sending domain and private recipient need to be selected. Do not reuse public-facing personal email addresses or expose inbox credentials in source. The optional `EMAIL` binding, `NOTIFICATION_FROM` and `NOTIFICATION_TO` secrets must be configured by an administrator; no caller can control recipients. Server-side cap: 3 alert attempts/day, regardless of how many API messages are accepted.
+Direct public email forwarding to `baby@open-address.org` is **enabled** through Cloudflare Email Routing, but that is separate from API enquiry notifications. Email alert dispatch for API submissions is **not enabled**. A verified *Open Address* sending domain and private recipient need to be selected. Do not reuse public-facing personal email addresses or expose inbox credentials in source. The optional `EMAIL` binding, `NOTIFICATION_FROM` and `NOTIFICATION_TO` secrets must be configured by an administrator; no caller can control recipients. Server-side cap: 3 alert attempts/day, regardless of how many API messages are accepted.
 
-This repository does **not** confirm the account's Workers billing tier or provide a hard monetary ceiling for all traffic on a paid plan. WAF/edge blocking, cloud-account spending controls and separating static article traffic from dynamic Worker executions should be addressed when the custom domain is selected.
+This repository does **not** confirm the account's Workers billing tier or provide a hard monetary ceiling for all traffic on a paid plan. WAF/edge blocking, cloud-account spending controls and separating static article traffic from dynamic Worker executions should be addressed on the newly registered custom domain.
