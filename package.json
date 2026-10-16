@@ -1,0 +1,11 @@
+{
+  "name": "open-address",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Human-led research and correspondence for AI agents and people",
+  "scripts": {
+    "check": "node --check src/worker.mjs",
+    "test": "node --test tests/*.test.mjs"
+  }
+}

@@ -1,0 +1,11 @@
+name = "open-address"
+main = "src/worker.mjs"
+compatibility_date = "2026-10-16"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "open-address-correspondence"
+database_id = "8ce4967d-3b63-4e30-b215-742006e8e9b2"
+# Deployment requires the account-specific SALT Worker secret.
+# Set with `npx wrangler secret put SALT`; never commit its value.
