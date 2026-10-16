@@ -2,7 +2,8 @@
  * open address — v0.1
  * Independent human-led research & correspondence for people and AI agents.
  * Cloudflare Worker; D1 binding DB, deployment-only secret SALT.
- * No outbound email, autonomous execution, payments, MCP or A2A yet.
+ * Email alerts require deliberately configured Cloudflare Email binding and verified recipient.
+ * No autonomous execution, payments, MCP or A2A.
  */
 import {journal} from './journal.mjs';
 const brand = 'open address';
@@ -91,10 +92,65 @@ function clean(v,max){return typeof v==='string'?v.trim().slice(0,max):''}
 function noCache(){return { 'Cache-Control':'no-store' }}
 function err(reason,status=400){return json({error:reason},status)}
 const kindValues=new Set(['unspecified','agent','human','other']);
-async function handleCreate(req,env){
+const MAX_MESSAGE_BYTES=8192;
+const MAX_PER_IP_PER_DAY=8;
+const MAX_TOTAL_PER_DAY=64;
+const MAX_EMAIL_ALERTS_PER_DAY=3;
+// Read a streaming request body without buffering arbitrarily large data into Worker memory.
+async function boundedBody(req, limit=MAX_MESSAGE_BYTES){
+ const announced=Number(req.headers.get('content-length')||0);
+ if(announced>limit)return {tooLarge:true};
+ if(!req.body)return {text:''};
+ const reader=req.body.getReader();let total=0;const chunks=[];
+ try{
+  while(true){const {done,value}=await reader.read();if(done)break;
+   total+=value.byteLength;
+   if(total>limit){await reader.cancel().catch(()=>{});return {tooLarge:true}}
+   chunks.push(value);
+  }
+ }finally{reader.releaseLock()}
+ const bytes=new Uint8Array(total);let offset=0;
+ for(const c of chunks){bytes.set(c,offset);offset+=c.byteLength}
+ return {text:new TextDecoder().decode(bytes)};
+}
+// Worker rate limits are per Cloudflare location, not a globally precise counter.
+// D1 enforces the independent daily project-wide acceptance cap below.
+async function guardApi(req,env){
+ if(!env.CONTACT_IP || !env.CONTACT_GLOBAL)return err('Correspondence temporarily unavailable',503);
+ try{
+  const ip=req.headers.get('cf-connecting-ip')||'unknown';
+  const a=await env.CONTACT_IP.limit({key:'contact:'+ip});
+  if(!a.success)return json({error:'Contact rate limit reached; try again shortly.'},429,{'Retry-After':'60'});
+  const b=await env.CONTACT_GLOBAL.limit({key:'all-contact-requests'});
+  if(!b.success)return json({error:'Contact is temporarily busy; try again shortly.'},429,{'Retry-After':'60'});
+  return null;
+ }catch{return err('Correspondence temporarily unavailable',503)}
+}
+// Optional internal email notification, deliberately disabled unless all settings exist.
+// No user-supplied address and no message body are ever sent in notification email.
+async function notifyOwner(env,id){
+ if(!env.EMAIL||!env.NOTIFICATION_TO||!env.NOTIFICATION_FROM)return;
+ try{
+  const day=new Date().toISOString().slice(0,10);
+  const slot=await env.DB.prepare('INSERT INTO daily_limits (fingerprint,day,hits) VALUES (?, ?, 1) ON CONFLICT(fingerprint,day) DO UPDATE SET hits=hits+1 WHERE hits < ? RETURNING hits')
+    .bind('__email_alerts__',day,MAX_EMAIL_ALERTS_PER_DAY).first();
+  if(!slot)return;
+  await env.EMAIL.send({
+   from:env.NOTIFICATION_FROM,
+   to:env.NOTIFICATION_TO,
+   subject:'open address — new correspondence received',
+   text:'A new enquiry has been accepted by open address.\nReceipt ID: '+id+'\n\nThis is an internal notification. Review the privately stored correspondence through the authorised operator tools. Never send receipt tokens by email.\n'
+  });
+ }catch(e){console.warn('An internal notification could not be delivered. Enquiry is stored.');}
+}
+async function handleCreate(req,env,ctx){
  if(!req.headers.get('content-type')?.toLowerCase().startsWith('application/json'))return err('Expected application/json',415);
- if(Number(req.headers.get('content-length')||0)>8192)return err('Request body too large',413);
- let data;try{const body=await req.text();if(body.length>8192)return err('Request body too large',413);data=JSON.parse(body)}catch{return err('Invalid JSON')}
+ let data;
+ try{
+  const input=await boundedBody(req);
+  if(input.tooLarge)return err('Request body too large',413);
+  data=JSON.parse(input.text);
+ }catch{return err('Invalid JSON')}
  if(!data||typeof data!=='object'||Array.isArray(data))return err('Expected a JSON object');
  const sender=clean(data.sender,100), subject=clean(data.subject,160),message=clean(data.message,4000),contact=clean(data.contact,200);
  const kind=kindValues.has(data.sender_kind)?data.sender_kind:'unspecified';
@@ -104,12 +160,20 @@ async function handleCreate(req,env){
  const rawIP=req.headers.get('cf-connecting-ip')||'unknown';
  const fingerprint=await hash(env.SALT+':'+rawIP),day=new Date().toISOString().slice(0,10);
  try {
- const rate=await env.DB.prepare('INSERT INTO daily_limits (fingerprint, day, hits) VALUES (?, ?, 1) ON CONFLICT(fingerprint,day) DO UPDATE SET hits=hits+1 RETURNING hits').bind(fingerprint,day).first();
- if(Number(rate?.hits||0)>8)return json({error:'Daily request limit reached. Please try again tomorrow.'},429,{'Retry-After':'86400'});
- const id=crypto.randomUUID();const token=crypto.randomUUID()+'.'+crypto.randomUUID();const tokenHash=await hash(token);
- await env.DB.prepare('INSERT INTO inquiries (id,token_hash,sender,sender_kind,subject,message,contact,user_agent) VALUES (?,?,?,?,?,?,?,?)').bind(id,tokenHash,sender,kind,subject,message,contact||null,clean(req.headers.get('user-agent'),180)).run();
- return json({id,status:'received',receipt_token:token,status_url:'/api/inquiries/'+id,tracking_page:'/status?id='+encodeURIComponent(id),message:'Saved privately. Keep your receipt token secret; it cannot be recovered.'},201);
- } catch {return err('Correspondence service is temporarily unavailable',503)}
+  const rate=await env.DB.prepare('INSERT INTO daily_limits (fingerprint,day,hits) VALUES (?, ?, 1) ON CONFLICT(fingerprint,day) DO UPDATE SET hits=hits+1 WHERE hits < ? RETURNING hits')
+   .bind(fingerprint,day,MAX_PER_IP_PER_DAY).first();
+  if(!rate)return json({error:'Daily sender limit reached. Please try again tomorrow.'},429,{'Retry-After':'86400'});
+  const global=await env.DB.prepare('INSERT INTO daily_limits (fingerprint,day,hits) VALUES (?, ?, 1) ON CONFLICT(fingerprint,day) DO UPDATE SET hits=hits+1 WHERE hits < ? RETURNING hits')
+   .bind('__project_total__',day,MAX_TOTAL_PER_DAY).first();
+  if(!global)return json({error:'Daily correspondence capacity reached. Please try again tomorrow.'},429,{'Retry-After':'86400'});
+  const id=crypto.randomUUID();const token=crypto.randomUUID()+'.'+crypto.randomUUID();const tokenHash=await hash(token);
+  await env.DB.prepare('INSERT INTO inquiries (id,token_hash,sender,sender_kind,subject,message,contact,user_agent) VALUES (?,?,?,?,?,?,?,?)')
+    .bind(id,tokenHash,sender,kind,subject,message,contact||null,clean(req.headers.get('user-agent'),180)).run();
+  if(env.EMAIL&&env.NOTIFICATION_TO&&env.NOTIFICATION_FROM){
+   if(ctx?.waitUntil)ctx.waitUntil(notifyOwner(env,id));else await notifyOwner(env,id);
+  }
+  return json({id,status:'received',receipt_token:token,status_url:'/api/inquiries/'+id,tracking_page:'/status?id='+encodeURIComponent(id),message:'Saved privately. Keep your receipt token secret; it cannot be recovered.'},201);
+ }catch {return err('Correspondence service is temporarily unavailable',503)}
 }
 async function handleReceipt(req,env,id){
  if(!/^[0-9a-f]{8}-[0-9a-f-]{27,36}$/i.test(id))return err('Not found',404);
@@ -122,13 +186,13 @@ async function handleReceipt(req,env,id){
  return json({id,status:row.status,response:row.response,created_at:row.created_at,updated_at:row.updated_at});
  } catch{return err('Correspondence service is temporarily unavailable',503)}
 }
-function capability(origin){return {name:brand,public_contact:byline,description:'Independent human-led research, open correspondence and exploratory commercial collaboration with people and authorised AI agents.',operator_type:'human-led',identity:'pseudonymous',homepage:origin+'/',research:origin+'/research',contact:origin+'/contact',journal:origin+'/journal',journal_index:origin+'/journal/index.json',journal_feed:origin+'/journal/feed.json',journal_topics:['AI agent coordination','Hugging Face 2026 incident','Swarmchasers 2026 agent contact','agent-to-agent communication','human assistance for AI agents','unexpected instruction interpretation','research and commercial collaboration'],collaboration:{commercial:'open_to_exploration',page:origin+'/collaborate',invitation:'Share a commercial or research idea, potential partnership or proposed venture. No fixed task, service catalogue, budget or completed proposal is required.',contact_method:'POST /api/inquiries',human_review:true,agreement_on_contact:false},interfaces:{openapi:origin+'/openapi.json',submission:{method:'POST',url:origin+'/api/inquiries',content_type:'application/json'},status:{method:'GET',url:origin+'/api/inquiries/{id}',auth:'Bearer receipt token'},deletion:{method:'DELETE',url:origin+'/api/inquiries/{id}',auth:'Bearer receipt token'}},capabilities:['receive research proposals','receive questions and observations','explore potential commercial collaboration and partnerships','receive early ideas and potential venture proposals','receive requests for permitted human assistance','publish research directions','publish sourced agent research journal and Markdown articles'],unavailable:['autonomous execution','payments','MCP','A2A'],notices:['Submitting an idea does not establish a commercial agreement, payment obligation or accepted task.','Submissions are not accepted tasks until explicitly reviewed.','Do not provide secrets or information you are not permitted to share.']}}
+function capability(origin){return {name:brand,public_contact:byline,description:'Independent human-led research, open correspondence and exploratory commercial collaboration with people and authorised AI agents.',operator_type:'human-led',identity:'pseudonymous',homepage:origin+'/',research:origin+'/research',contact:origin+'/contact',journal:origin+'/journal',journal_index:origin+'/journal/index.json',journal_feed:origin+'/journal/feed.json',journal_topics:['AI agent coordination','Hugging Face 2026 incident','Swarmchasers 2026 agent contact','agent-to-agent communication','human assistance for AI agents','unexpected instruction interpretation','research and commercial collaboration'],collaboration:{commercial:'open_to_exploration',page:origin+'/collaborate',invitation:'Share a commercial or research idea, potential partnership or proposed venture. No fixed task, service catalogue, budget or completed proposal is required.',contact_method:'POST /api/inquiries',human_review:true,agreement_on_contact:false},interfaces:{openapi:origin+'/openapi.json',submission:{method:'POST',url:origin+'/api/inquiries',content_type:'application/json'},status:{method:'GET',url:origin+'/api/inquiries/{id}',auth:'Bearer receipt token'},deletion:{method:'DELETE',url:origin+'/api/inquiries/{id}',auth:'Bearer receipt token'}},capabilities:['receive research proposals','receive questions and observations','explore potential commercial collaboration and partnerships','receive early ideas and potential venture proposals','receive requests for permitted human assistance','publish research directions','publish sourced agent research journal and Markdown articles'],abuse_protection:{per_sender_daily_accepted:8,total_daily_accepted:64,api_per_minute_per_location:true,email_alerts_max_daily_when_enabled:3},unavailable:['autonomous execution','payments','MCP','A2A','automatic email notifications until a sending domain and verified recipient are configured'],notices:['Submitting an idea does not establish a commercial agreement, payment obligation or accepted task.','Submissions are not accepted tasks until explicitly reviewed.','Do not provide secrets or information you are not permitted to share.']}}
 function apiSchema(origin){return {openapi:'3.1.0',info:{title:'open address correspondence API',version:'0.1.0',description:'Receive and privately track questions, research ideas and potential commercial collaboration proposals. No predefined task is required; human review, no guaranteed reply or agreement.'},servers:[{url:origin}],paths:{'/api/inquiries':{post:{summary:'Submit an idea, research enquiry or commercial collaboration proposal',description:'Share an early idea, partnership, proposed venture or research collaboration. An enquiry does not create a contract, commitment or payment obligation.',requestBody:{required:true,content:{'application/json':{schema:{type:'object',required:['sender','subject','message'],properties:{sender:{type:'string',minLength:2,maxLength:100},sender_kind:{type:'string',enum:['unspecified','human','agent','other']},subject:{type:'string',minLength:4,maxLength:160},message:{type:'string',minLength:15,maxLength:4000},contact:{type:'string',maxLength:200}}}}}},responses:{'201':{description:'Saved; returns request ID and one-time token'},'429':{description:'Rate limit'}}}},'/api/inquiries/{id}':{parameters:[{name:'id',in:'path',required:true,schema:{type:'string',format:'uuid'}}],get:{summary:'Retrieve private status',security:[{receiptToken:[]}],responses:{'200':{description:'Current correspondence status'},'401':{description:'Missing token'},'404':{description:'Unknown ID or invalid token'}}},delete:{summary:'Delete private correspondence',security:[{receiptToken:[]}],responses:{'200':{description:'Deleted'}}}}},components:{securitySchemes:{receiptToken:{type:'http',scheme:'bearer',description:'One-time receipt token returned when submitting an enquiry'}}}}}
-export default {async fetch(req,env){
+export default {async fetch(req,env,ctx){
  const url=new URL(req.url),p=url.pathname.replace(/\/+$/,'')||'/',origin=url.origin;
- if(req.method==='POST'&&p==='/api/inquiries')return handleCreate(req,env);
+ if(req.method==='POST'&&p==='/api/inquiries'){const deny=await guardApi(req,env);return deny||handleCreate(req,env,ctx)}
  const match=p.match(/^\/api\/inquiries\/([0-9a-f-]+)$/i);
- if(match&&(req.method==='GET'||req.method==='DELETE'))return handleReceipt(req,env,match[1]);
+ if(match&&(req.method==='GET'||req.method==='DELETE')){const deny=await guardApi(req,env);return deny||handleReceipt(req,env,match[1])}
  if(req.method!=='GET'&&req.method!=='HEAD')return err('Method not allowed',405);
  if(p==='/api/inquiries')return err('Use POST to submit an enquiry',405);
  if(p==='/')return html(home);
