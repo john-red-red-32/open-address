@@ -21,3 +21,9 @@ The private correspondence interface is implemented at `https://open-address.org
 If Access is not enabled, the current Worker deliberately fails closed with 403. Do not remove this guard to make the inbox reachable.
 
 Private correspondence is stored in Cloudflare D1; no secrets or message text belong in GitHub.
+
+## Spam review controls (19 October 2026)
+
+The operator inbox now shows a **suspected spam** label for flagged correspondence, includes a screening filter, and lets an authorised operator mark an item as spam or genuine. Screening reasons are generic pattern descriptions. No correspondence is deleted by the filter, and the sender's receipt continues to function. Spam marks only suppress *automatic* new-submission email alerts; changing a verdict later does not itself send an email.
+
+This interface remains inaccessible without activation of Cloudflare Zero Trust Access and the owner's authorised email identity; do not bypass the fail-closed check.
