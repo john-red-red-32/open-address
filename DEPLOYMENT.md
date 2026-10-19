@@ -45,3 +45,11 @@ No Reborna repository, Worker, Pages project or database was modified as part of
 - `www.open-address.org` also routes to the Worker and redirects to the apex host. Disabled the old worker preview subdomain to reduce unprotected cost exposure.
 - Added IndexNow key-file route, automated GitHub Actions submission workflow, and GitHub Actions read-only live-site smoke tests. Actual submission outcomes and external live HTTP compatibility have not been verified from this session.
 - Local tests: **30 passed**. Search Console/Bing verification and Cloudflare Zero Trust Access activation still require user-owned account authorisation. No claim of indexing or registry status until verified.
+
+## 19 October 2026 · conservative spam screening
+
+- Added `src/screening.mjs` to the deployed Worker module bundle. The checked GitHub files (`src/worker.mjs`, `src/journal.mjs`, `src/operator.mjs`, `src/mcp.mjs`, `src/screening.mjs`) exactly matched the script downloaded from Cloudflare after deployment.
+- Cloudflare D1 migration added `screening`, `screening_score`, `screening_reason` columns to `inquiries`, plus a screening index; all existing correspondence was retained. The original unsolicited SEO sales enquiry was labelled suspected spam retroactively.
+- Suspected sales messages remain private and receipt-trackable, but do not trigger an administrator email nor use the 3/day alert limit. Operator-only screening review was added but remains locked until Cloudflare Zero Trust Access is configured.
+- Existing account email sender/destination allowlist, sender secrets, D1, Worker throttles, Cloudflare zone WAF and disabled `workers.dev` route were rechecked and preserved.
+- **34 local automated tests passed**. Cloudflare deployment and database schema were verified through the API; this does not constitute a live public submission-to-email smoke test. No paid AI/moderation API introduced.
