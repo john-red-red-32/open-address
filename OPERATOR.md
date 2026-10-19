@@ -21,9 +21,11 @@ The private correspondence interface is implemented at `https://open-address.org
 - One zone-level Cloudflare WAF edge rule also limits excessive `/operator` requests to 12 requests/10 seconds per IP per Cloudflare location, with a 10-second temporary block. This is not a global 24-hour or monthly monetary limit.
 - Worker still independently requires `ctx.access.getIdentity()` and an exact email match, so if Access is bypassed or misconfigured it fails closed.
 
+Authentication options now include a Cloudflare-managed one-time PIN sent to the authorised email address. This is an Access identity provider, not a billable email sent through the project's Resend or Cloudflare Email Service. Only the separately configured Allow policy email can enter.
+
 ## Owner verification still required
 
-1. Open `https://open-address.org/operator` in a browser and sign in using the private owner identity configured for Access.
+1. Open `https://open-address.org/operator` in a browser. Choose **Email one-time PIN** when prompted, enter the private owner email configured in Access, and use the code Cloudflare sends.
 2. Check the private inbox appears and the known enquiries can be reviewed.
 3. In an incognito browser *without authentication*, verify the same link cannot display the dashboard or its correspondence APIs.
 4. If a `403` appears **after** successfully authenticating, leave the security check intact and report it. We will diagnose the Access-to-Worker identity handoff rather than removing authentication.
