@@ -70,3 +70,11 @@ This repository does **not** confirm the account's Workers billing tier or provi
 - [SECURITY.md](SECURITY.md) — live edge and daily abuse limits, cost limitations, untrusted correspondence handling.
 - Public endpoints were validated by local unit tests (30 passing) and cloud configuration inspection. GitHub Actions has a read-only smoke test; **successful external HTTP retrieval and official registry/search indexing have not been independently verified here**.
 - Cloudflare Workers custom domains: apex and www; workers.dev preview explicitly disabled.
+
+## Conservative spam screening (19 October 2026)
+
+- Incoming correspondence is screened locally in `src/screening.mjs` using high-confidence, combined indicators of unsolicited SEO/marketing pitches. **No paid AI model, external API, scraping, or automated message deletion** is involved.
+- Possible spam is stored with the normal private receipt, while the private operator inbox can filter and manually mark it genuine/spam. Public responses do not disclose screening scores.
+- Messages classified as suspected spam **do not send administrative email alerts** and do not consume the daily 3-alert allocation. Legitimate research and commercial enquiries still trigger alerts within the cap. Suspected spam still counts toward the existing daily accepted-enquiry limits to resist abuse.
+- Existing Cloudflare D1 database received a non-destructive additive migration. New installs should apply `db/schema.sql`; existing installs should apply `db/migrations/20261019_screening.sql` **once** before deploying the new Worker.
+- 34 local tests passed, including the original unsolicited SEO pitch and genuine research/commercial counterexamples. External live POST/email verification remains separate from these local tests.
