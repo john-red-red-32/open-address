@@ -40,7 +40,7 @@ test('suspected spam is accepted and stored with receipt but does not consume sc
  const env=environment(); const first=await submit(env,sales);assert.equal(first.status,201);
  const id=(await first.json()).id;assert.equal(env.inquiries.get(id).screening,'suspected_spam');assert.equal(env.sent.length,0);assert.equal(env.limits.has('__email_alerts__|'+new Date().toISOString().slice(0,10)),false);
  for(let i=0;i<3;i++)assert.equal((await submit(env,genuine)).status,201);
- assert.equal(env.sent.length,3);assert.ok(env.sent.every(x=>!x.text.includes(genuine.message)&&!x.text.includes('Diana Cruz')));
+ assert.equal(env.sent.length,3);assert.ok(env.sent.every(x=>x.text.includes(genuine.message)&&!x.text.includes('Diana Cruz')));
  assert.equal((await submit(env,genuine)).status,201);assert.equal(env.sent.length,3);
 });
 test('private inbox can inspect and manually correct a spam flag, but never without Cloudflare Access',async()=>{
