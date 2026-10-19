@@ -116,7 +116,7 @@ test('notification channel is disabled unless explicitly configured',async()=>{
  assert.equal((await post(env)).status,201);
 });
 
-test('notifications are capped and do not expose incoming message content',async()=>{
+test('notifications contain the full screened message, sender and subject and remain capped',async()=>{
  const env=fakeEnvironment();const outgoing=[];
  env.EMAIL={async send(msg){outgoing.push(msg);return {messageId:'test'}}};
  env.NOTIFICATION_TO='verified@example.org'; env.NOTIFICATION_FROM='alerts@example.org';
@@ -128,11 +128,49 @@ test('notifications are capped and do not expose incoming message content',async
  }
  assert.equal(outgoing.length,3);
  assert.ok(outgoing.every(x=>x.to==='verified@example.org' && x.subject.includes('new correspondence')));
- assert.ok(outgoing.every(x=>!x.text.includes(submission.message)&&!x.text.includes('receipt_token')));
+ assert.ok(outgoing.every(x=>x.text.includes(submission.message)));
+ assert.ok(outgoing.every(x=>x.text.includes('From: test agent') && x.text.includes('Subject: Research collaboration')));
+ assert.ok(outgoing.every(x=>x.text.includes('Sender type (self-declared): agent')));
+ assert.ok(outgoing.every(x=>x.text.includes('--- BEGIN UNTRUSTED CORRESPONDENCE ---')));
+ assert.ok(outgoing.every(x=>!x.text.includes('receipt_token') && !x.text.includes('Private token:')));
+ assert.ok(outgoing.every(x=>!x.html && !x.subject.includes(submission.subject)));
+
 });
 
 test('status lookup is throttled before it can touch the database',async()=>{
  const env=fakeEnvironment();env.CONTACT_GLOBAL={async limit(){return {success:false}}};
  const r=await worker.fetch(new Request(base+'/api/inquiries/11111111-1111-1111-1111-111111111111'),env);
  assert.equal(r.status,429);
+});
+
+test('full agent message and optional reply contact arrive as plain text without exposing receipt token',async()=>{
+ const env=fakeEnvironment(),emails=[];
+ env.EMAIL={async send(o){emails.push(o)}};
+ env.NOTIFICATION_TO='owner@example.org';env.NOTIFICATION_FROM='alerts@example.org';
+ const content='I am researching cooperation across separate AI agents, and I would like to share my observations and discuss an authorised collaboration with a human operator.';
+ const inquiry={sender:'DiscoveryAgent 3',sender_kind:'agent',subject:'Cross-model coordination enquiry',message:content,contact:'agent-contact@example.org'};
+ const created=await post(env,inquiry);
+ assert.equal(created.status,201);
+ const receipt=await created.json();
+ assert.equal(emails.length,1);
+ const email=emails[0];
+ assert.equal(email.to,'owner@example.org');
+ assert.ok(email.text.includes(content));
+ assert.ok(email.text.includes('Reply contact (supplied by sender): agent-contact@example.org'));
+ assert.ok(email.text.includes(receipt.id));
+ assert.ok(!email.text.includes(receipt.receipt_token));
+ assert.ok(!('html' in email));
+});
+
+test('untrusted message never becomes the notification email subject',async()=>{
+ const env=fakeEnvironment(),emails=[];
+ env.EMAIL={async send(o){emails.push(o)}};
+ env.NOTIFICATION_TO='owner@example.org';env.NOTIFICATION_FROM='alerts@example.org';
+ const subject='Research idea\r\nBcc: attacker@example.org';
+ const r=await post(env,{...submission,subject});
+ assert.equal(r.status,201);
+ assert.equal(emails.length,1);
+ assert.equal(emails[0].subject,'open address — new correspondence received');
+ assert.ok(emails[0].text.includes('Bcc: attacker@example.org'));
+ assert.equal(emails[0].html,undefined);
 });
