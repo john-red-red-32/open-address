@@ -13,7 +13,7 @@ Independent human-led research and correspondence platform. Public author/contac
 - Cloudflare Email Service notification adapter: **enabled**, up to 3 attempts per UTC day, to one verified private destination. For enquiries that pass spam screening, alerts include the sender label, declared type, subject, full accepted message (up to 4,000 characters), and optional reply contact, as plain text. Receipt tokens are never emailed.
 - No payments, autonomous execution, MCP, A2A, or automatic replies; limited internal outgoing notification emails are enabled.
 - Concept-note entries are not yet published white papers
-- A bounded Streamable HTTP MCP endpoint at `/mcp` (2026-07-28) with public research and opt-in enquiry tools; `server.json` is prepared, but no official MCP Registry listing has been claimed\n- A private operator inbox at `/operator`, **fail-closed until Cloudflare Zero Trust Access is enabled by the account owner**\n- Dedicated trust, changelog, security disclosure, IndexNow and GitHub Actions external smoke-check setup\n- Commercial collaboration welcome: a dedicated `/collaborate` page, agent-readable invitation, and open enquiry path for early ideas (no predefined tasks or contracts)
+- A bounded Streamable HTTP MCP endpoint at `/mcp` (2026-07-28) with public research and opt-in enquiry tools; `server.json` is prepared, but no official MCP Registry listing has been claimed\n- A private operator inbox at `/operator`, with owner-only Cloudflare Zero Trust Access protection activated (browser sign-in not yet independently verified)\n- Dedicated trust, changelog, security disclosure, IndexNow and GitHub Actions external smoke-check setup\n- Commercial collaboration welcome: a dedicated `/collaborate` page, agent-readable invitation, and open enquiry path for early ideas (no predefined tasks or contracts)
 
 ## Current domain and Cloudflare deployment
 
@@ -78,3 +78,7 @@ This repository does **not** confirm the account's Workers billing tier or provi
 - Messages classified as suspected spam **do not send administrative email alerts** and do not consume the daily 3-alert allocation. Legitimate research and commercial enquiries still trigger alerts within the cap. Suspected spam still counts toward the existing daily accepted-enquiry limits to resist abuse.
 - Existing Cloudflare D1 database received a non-destructive additive migration. New installs should apply `db/schema.sql`; existing installs should apply `db/migrations/20261019_screening.sql` **once** before deploying the new Worker.
 - 34 local tests passed, including the original unsolicited SEO pitch and genuine research/commercial counterexamples. External live POST/email verification remains separate from these local tests.
+
+## Private correspondence access (19 October 2026)
+
+Cloudflare Zero Trust Access is activated for `/operator` and `/operator/*` with an owner-only email allow policy. The public website is unaffected. The first owner login must still be tested before declaring the interface fully verified. WAF edge limits the private route to 12 requests/10 seconds/IP/colo. See [OPERATOR.md](OPERATOR.md) and [SECURITY.md](SECURITY.md). This is not a hard site-wide monthly spending cap.
