@@ -39,7 +39,7 @@ No Reborna repository, Worker, Pages project or database was modified as part of
 
 - Production code now uses four Cloudflare Worker modules: `src/worker.mjs`, `src/journal.mjs`, `src/operator.mjs` and `src/mcp.mjs`. All module contents were compared with Cloudflare script download and matched.
 - Added canonical page URLs, `/trust`, `/changelog`, `/.well-known/security.txt`, a machine-readable MCP interface on `/mcp` (2026-07-28), and dedicated owner-only inbox code on `/operator`.
-- **Inbox not yet user-accessible:** Zero Trust Access is not enabled for the account, so the server correctly refuses all operator access even if the private email secret is present. Access setup is documented in `OPERATOR.md` and requires owner interaction.
+- **Inbox Access configured:** On 19 October 2026, owner activated Zero Trust and Cloudflare Access app/policy were created protecting `/operator` and `/operator/*` to the owner's private allowlisted email. Authenticated browser sign-in remains unverified; Worker still fails closed without `ctx.access`.
 - `/mcp` advertises three bounded tools (`get_contact`, `list_research`, `submit_inquiry`) and reuses the same database and email quotas as the REST API. No official MCP Registry publication is claimed; `server.json` is prepared for the owner-authenticated listing process.
 - Cloudflare zone rate-limit rule enabled for POST `/api/inquiries` and `/mcp` at both apex and www (12 requests/10s/IP/colo, 10s mitigation), ahead of Worker execution; original Worker and D1 caps remain unchanged.
 - `www.open-address.org` also routes to the Worker and redirects to the apex host. Disabled the old worker preview subdomain to reduce unprotected cost exposure.
@@ -58,3 +58,11 @@ No Reborna repository, Worker, Pages project or database was modified as part of
 
 - Email notifications now include the entire accepted correspondence, sender label, self-declared sender type, subject, optional reply contact and enquiry ID as text/plain. Email subject is fixed by the Worker, and no private receipt token is transmitted.
 - Suspicious sales messages remain excluded from notifications and from the daily three-alert allowance. Full-message email delivery has been validated locally with unit tests; external end-to-end acceptance remains to be confirmed.
+
+## 19 October 2026 · private inbox Access activation
+
+- Created owner-only self-hosted Cloudflare Access application for `open-address.org/operator` and `open-address.org/operator/*`, with a 12-hour session and binding cookie. Verified the app and a single-email Allow policy via Cloudflare API.
+- Extended the one existing zone-level rate limiting rule to protect `/operator` and nested requests at 12 per 10 seconds per IP/Cloudflare location, 10-second mitigation; the two public POST endpoints retain coverage.
+- Confirmed domain sending with Resend has become **verified** for `open-address.org` using four DNS records. The outbound reply remains stored in D1; no external email was sent in this step.
+- Account billing level and Zero Trust Free vs paid subscription cannot be read without Cloudflare Billing Read permission. Check that the plan is Free; no payment-plan change was performed.
+- External authenticated browser test of `/operator` pending operator sign-in. The public homepage was retrieved successfully through an independent web crawler.
