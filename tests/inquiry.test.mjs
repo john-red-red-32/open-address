@@ -26,9 +26,9 @@ function fakeEnvironment() {
         },
         async run() {
           if (sql.startsWith('INSERT INTO inquiries')) {
-            const [id, token_hash, sender, sender_kind, subject, message, contact, user_agent] = args;
+            const [id, token_hash, sender, sender_kind, subject, message, contact, user_agent, screening, screening_score, screening_reason] = args;
             inquiries.set(id, {id, token_hash, sender, sender_kind, subject, message, contact, user_agent,
-              status: 'received', response: null, created_at: '2026-10-16T00:00:00Z', updated_at: '2026-10-16T00:00:00Z'});
+              status: 'received', screening, screening_score, screening_reason, response: null, created_at: '2026-10-16T00:00:00Z', updated_at: '2026-10-16T00:00:00Z'});
             return {success:true};
           }
           if (sql.startsWith('DELETE FROM inquiries')) {
