@@ -7,6 +7,9 @@ CREATE TABLE IF NOT EXISTS inquiries (
  message TEXT NOT NULL,
  contact TEXT,
  status TEXT NOT NULL DEFAULT 'received',
+ screening TEXT NOT NULL DEFAULT 'clear',
+ screening_score INTEGER NOT NULL DEFAULT 0,
+ screening_reason TEXT,
  response TEXT,
  created_at TEXT NOT NULL DEFAULT (datetime('now')),
  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -21,3 +24,4 @@ CREATE TABLE IF NOT EXISTS daily_limits (
 );
 CREATE INDEX IF NOT EXISTS idx_inquiries_created ON inquiries(created_at);
 CREATE INDEX IF NOT EXISTS idx_inquiries_status ON inquiries(status);
+CREATE INDEX IF NOT EXISTS idx_inquiries_screening ON inquiries(screening);
