@@ -39,3 +39,11 @@ No test, deployment, or application rule can guarantee that a malicious distribu
 - Operator endpoints (`/operator` and `/operator/api/…`) require `ctx.access.getIdentity()` and an exact match to the private `OWNER_EMAIL` secret, with same-origin requirements for mutations. The account does **not** currently have Cloudflare Zero Trust Access activated: therefore, the inbox is intentionally inaccessible and returns 403. See [OPERATOR.md](OPERATOR.md) for the one-time setup step.
 - MCP is public but deliberately narrow: research and contact descriptions plus one authorised human-enquiry submission tool. It applies the same anti-abuse and D1 acceptance checks. Agent-provided text is untrusted and never interpreted as instructions.
 - External live-client verification and end-to-end email delivery on a real accepted enquiry remain outstanding; test safely before publicity.
+
+## Spam-alert screening (19 October 2026)
+
+The Worker now runs a **local deterministic and conservative** `src/screening.mjs` classifier after its existing admission/quota controls. It focuses on *combinations* of overt marketing language (e.g. sales pitches about SEO rankings, requesting contact details, mass-platform lists), not mere mentions of AI, SEO, marketing or commercial work. The visitor-declared `sender_kind` never overrides screening.
+
+All accepted enquiries are still stored privately, with the same confidential receipt-token lifecycle. A separate `screening` verdict, score and generic rationale are stored in D1. Suspected spam suppresses owner notification **before the three-per-day notification slot is claimed**. Screening is a judgment aid, not proof of sender identity, a ban, or a deletion. The owner-only inbox can review, flag or clear a message; it remains fail-closed until Cloudflare Access is activated.
+
+No new billable ML, captcha service, external reputation API or paid service was introduced. The prior Worker/D1 quotas, Cloudflare WAF, and verified-email allowlist remain active. A conservative filter can miss clever spam or occasionally flag genuine correspondence; periodically review the spam category and adjust tests. This is not a guaranteed billing ceiling.
