@@ -25,7 +25,7 @@ No Reborna repository, Worker, Pages project or database was modified as part of
 - Application API protections: 20 requests/minute per IP per Cloudflare location; 200 requests/minute per Cloudflare location across clients.
 - D1 atomic quotas: no more than 8 accepted enquiries per salted IP per UTC day; at most 64 accepted enquiries total per UTC day.
 - Request size limited to 8,192 bytes using bounded streaming. Contact endpoints fail closed if rate-limit bindings are absent.
-- Internal Cloudflare Email Service alerts are enabled: `EMAIL` binding allows only `alerts@open-address.org` and a single account-verified private destination. `NOTIFICATION_TO` is a secret-text binding; `NOTIFICATION_FROM` is configured. At most 3 alert attempts/day. No user message content or receipt tokens in alerts.
+- Internal Cloudflare Email Service alerts are enabled: `EMAIL` binding allows only `alerts@open-address.org` and a single account-verified private destination. `NOTIFICATION_TO` is a secret-text binding; `NOTIFICATION_FROM` is configured. At most 3 alert attempts/day. For non-spam accepted correspondence, alert emails contain the full plain-text message, sender label, declared type, subject, optional contact and enquiry ID; they never contain private receipt tokens or HTML.
 - GitHub project tests: 24 passing locally at this release; current CI workflow executes tests on main.
 - Cloudflare account billing information is not accessible to this integration; Worker-on-paid billing cannot be assumed capped. See [SECURITY.md](SECURITY.md).
 
@@ -53,3 +53,8 @@ No Reborna repository, Worker, Pages project or database was modified as part of
 - Suspected sales messages remain private and receipt-trackable, but do not trigger an administrator email nor use the 3/day alert limit. Operator-only screening review was added but remains locked until Cloudflare Zero Trust Access is configured.
 - Existing account email sender/destination allowlist, sender secrets, D1, Worker throttles, Cloudflare zone WAF and disabled `workers.dev` route were rechecked and preserved.
 - **34 local automated tests passed**. Cloudflare deployment and database schema were verified through the API; this does not constitute a live public submission-to-email smoke test. No paid AI/moderation API introduced.
+
+## 19 October 2026 · Full-message notifications
+
+- Email notifications now include the entire accepted correspondence, sender label, self-declared sender type, subject, optional reply contact and enquiry ID as text/plain. Email subject is fixed by the Worker, and no private receipt token is transmitted.
+- Suspicious sales messages remain excluded from notifications and from the daily three-alert allowance. Full-message email delivery has been validated locally with unit tests; external end-to-end acceptance remains to be confirmed.
