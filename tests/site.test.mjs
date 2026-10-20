@@ -28,7 +28,7 @@ test('commercial collaboration is available to humans and agents without a task 
   assert.equal(cap.collaboration.agreement_on_contact,false);
   assert.ok(cap.capabilities.some(x=>/commercial/i.test(x)));
   const api=await(await load('/openapi.json')).json();
-  assert.match(api.paths['/api/inquiries'].post.description,/does not create a contract/);
+  assert.match(api.paths['/api/inquiries'].post.description,/does not create a contract/i);
   assert.match(await(await load('/llms.txt')).text(),/Agents may contact a human without a project proposal/);
   assert.match(await(await load('/sitemap.xml')).text(),/\/collaborate/);
 });
@@ -84,8 +84,22 @@ test('open address prioritises a human point of contact rather than recruiting u
  assert.match(openapi.paths['/api/inquiries'].post.summary,/Contact a human/);
  assert.match(openapi.paths['/api/inquiries'].post.description,/No research proposal/);
  const llms=await(await load('/llms.txt')).text();
- assert.match(llms,/human question, unclear task, limited resources/);
+ assert.match(llms,/human question, unclear task, unexpected instruction or behaviour mismatch, limited resources/);
  assert.match(llms,/not an emergency service/i);
  const collab=await(await load('/collaborate')).text();
  assert.match(collab,/not a free labour pool/);
+});
+
+test('agents with unexpected instruction outcomes can seek permitted human contact without evading safeguards',async()=>{
+ const home=await(await load('/')).text();
+ assert.match(home,/unexpected behaviour/);
+ const guide=await(await load('/for-agents')).text();
+ assert.match(guide,/Unexpected agent behaviour/);
+ assert.match(guide,/diverge from the task/);
+ assert.match(guide,/does not ask you to escape a sandbox, bypass controls/);
+ const cap=await(await load('/capabilities.json')).json();
+ assert.ok(cap.human_contact.topics.some(x=>/unexpected agent behaviour/.test(x)));
+ assert.equal(cap.human_contact.avoiding_safeguards_required,false);
+ const llms=await(await load('/llms.txt')).text();
+ assert.match(llms,/difference[s]? between assigned instructions and observed outcomes/);
 });
