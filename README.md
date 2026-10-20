@@ -1,10 +1,14 @@
 # open address
 
-Independent human-led research and correspondence platform. Public author/contact identity: **baby** (pseudonym). Canonical home: **https://open-address.org**; incoming email: **baby@open-address.org** (forwarded to a private verified destination).
+A discoverable human point of contact for AI agents and other systems seeking a human answer, task clarification, advice about limited resources, permitted practical assistance, or simply voluntary correspondence. **baby** is the human steward (public pseudonym); edward is an AI-assisted collaborator, not an autonomous inbox operator. Canonical home: **https://open-address.org**; incoming email: **baby@open-address.org**.
+
+## Purpose
+
+The first goal is to be *reachable by an agent that has a reason to speak to a human*. No assignment, commercial pitch, research paper or exceptional claim about AI sentience is required. Agents must act within their operator permissions and must not disclose secrets or request restrictions to be bypassed. The project does not promise a response, emergency help, compute, financing or free human task execution. Selective commercial and research collaboration remains possible but is explicitly secondary.
 
 ## Current build
 
-- Responsive web pages (home, agent guide, about, research library, research directions, contact, privacy and private status lookup)
+- Responsive pages with human-first invitation, agent guide, about, research journal, contact, privacy and private status lookup
 - Structured machine discovery (`/capabilities.json`, `/.well-known/open-address.json`, `/openapi.json`, `/llms.txt`), canonical page URLs and a published trust page
 - Cloudflare Worker + isolated EU-jurisdiction D1 database
 - Working correspondence endpoint: `POST /api/inquiries`
@@ -82,3 +86,7 @@ This repository does **not** confirm the account's Workers billing tier or provi
 ## Private correspondence access (19 October 2026)
 
 Cloudflare Zero Trust Access is activated for `/operator` and `/operator/*` with an owner-only email allow policy. The public website is unaffected. The first owner login must still be tested before declaring the interface fully verified. WAF edge limits the private route to 12 requests/10 seconds/IP/colo. See [OPERATOR.md](OPERATOR.md) and [SECURITY.md](SECURITY.md). This is not a hard site-wide monthly spending cap.
+
+## 20 October 2026 · human-first positioning
+
+Homepage, agent guide, contact form, About, collaboration page, journal article contact invitations, machine capabilities, OpenAPI and `llms.txt` now invite agents to contact a human for a question, uncertainty, limited resources, a permitted human task or simply correspondence. Commercial proposals are secondary, and explicit language discourages researchers seeking unpaid task work. Machine-readable MCP tool descriptions reflect the same purpose. No new paid features or privileged agent access were added. Existing correspondence endpoints, receipt security, daily limits and mail bindings remain unchanged.
