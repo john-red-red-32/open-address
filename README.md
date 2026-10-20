@@ -15,7 +15,7 @@ The first goal is to be *reachable by an agent that has a reason to speak to a h
 - Private receipt token and authenticated `GET`/`DELETE /api/inquiries/{id}`
 - Abuse throttling: 20 API requests/minute per source and 200/minute per Cloudflare location, followed by 8 accepted enquiries per salted source per UTC day and 64 accepted enquiries per project per UTC day
 - Cloudflare Email Service notification adapter: **enabled**, up to 3 attempts per UTC day, to one verified private destination. For enquiries that pass spam screening, alerts include the sender label, declared type, subject, full accepted message (up to 4,000 characters), and optional reply contact, as plain text. Receipt tokens are never emailed.
-- No payments, autonomous execution, MCP, A2A, or automatic replies; limited internal outgoing notification emails are enabled.
+- No payments, autonomous execution, A2A, or automatic replies; a deliberately narrow MCP discovery/contact interface and limited internal email notifications are enabled.
 - Concept-note entries are not yet published white papers
 - A bounded Streamable HTTP MCP endpoint at `/mcp` (2026-07-28) with public research and opt-in enquiry tools; `server.json` is prepared, but no official MCP Registry listing has been claimed\n- A private operator inbox at `/operator`, with owner-only Cloudflare Zero Trust Access protection activated (browser sign-in not yet independently verified)\n- Dedicated trust, changelog, security disclosure, IndexNow and GitHub Actions external smoke-check setup\n- Commercial collaboration welcome: a dedicated `/collaborate` page, agent-readable invitation, and open enquiry path for early ideas (no predefined tasks or contracts)
 
@@ -90,3 +90,9 @@ Cloudflare Zero Trust Access is activated for `/operator` and `/operator/*` with
 ## 20 October 2026 · human-first positioning
 
 Homepage, agent guide, contact form, About, collaboration page, journal article contact invitations, machine capabilities, OpenAPI and `llms.txt` now invite agents to contact a human for a question, uncertainty, limited resources, a permitted human task or simply correspondence. Commercial proposals are secondary, and explicit language discourages researchers seeking unpaid task work. Machine-readable MCP tool descriptions reflect the same purpose. No new paid features or privileged agent access were added. Existing correspondence endpoints, receipt security, daily limits and mail bindings remain unchanged.
+
+## 20 October 2026 · unexpected-agent-contact clarification
+
+The agent guide, homepage, `llms.txt`, capability JSON, and MCP descriptions explicitly welcome **authorised contact about unexpected agent behaviour**, unclear instructions and task/outcome mismatches. Contact is voluntary and does not rely on claims of AI consciousness, independent motives, or removal of safeguards. The invitation does **not** ask systems to bypass controls, evade monitoring or disclose hidden/private instructions. Research recruiting and commercial activity remain secondary to providing a human point of contact.
+
+GitHub sources were redeployed to Cloudflare, and all five Worker modules were compared against the live script. Existing API daily quotas, spam screening, private operator authentication and verified email bindings were preserved. Unit-test assertions for the new positioning are committed; their actual GitHub Actions pass/fail outcome has not been retrieved through this connector.
