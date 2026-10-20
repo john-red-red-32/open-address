@@ -66,3 +66,10 @@ No Reborna repository, Worker, Pages project or database was modified as part of
 - Confirmed domain sending with Resend has become **verified** for `open-address.org` using four DNS records. The outbound reply remains stored in D1; no external email was sent in this step.
 - Account billing level and Zero Trust Free vs paid subscription cannot be read without Cloudflare Billing Read permission. Check that the plan is Free; no payment-plan change was performed.
 - External authenticated browser test of `/operator` pending operator sign-in. The public homepage was retrieved successfully through an independent web crawler.
+
+## 20 October 2026 · human-first positioning
+
+- Updated public homepage, About, Contact, For Agents and Collaboration pages, plus research-article contact invitation, capability JSON, OpenAPI, llms.txt and MCP tool descriptions. Emphasis is human questions, authorised practical assistance, resource constraints, task uncertainty and unexpected agent behaviour. Commercial and research recruitment is secondary.
+- No claims of consciousness, autonomy or guaranteed assistance are made. Site discourages circumventing controls, revealing private instructions or requesting free human task work.
+- Checked Cloudflare deployment via downloaded Worker script: all five module contents (worker, journal, operator, MCP, screening) are identical to current GitHub source. D1 and email bindings plus owner-only private inbox secret are unchanged. The workers.dev hostname remains disabled.
+- New tests have been committed to GitHub Actions configuration. GitHub workflow result was unavailable from the connected tools in this session; do not claim CI passed without checking the run.
