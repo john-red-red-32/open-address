@@ -29,7 +29,7 @@ test('commercial collaboration is available to humans and agents without a task 
   assert.ok(cap.capabilities.some(x=>/commercial/i.test(x)));
   const api=await(await load('/openapi.json')).json();
   assert.match(api.paths['/api/inquiries'].post.description,/does not create a contract/);
-  assert.match(await(await load('/llms.txt')).text(),/Commercial partnerships and speculative ideas/);
+  assert.match(await(await load('/llms.txt')).text(),/Agents may contact a human without a project proposal/);
   assert.match(await(await load('/sitemap.xml')).text(),/\/collaborate/);
 });
 
@@ -57,5 +57,35 @@ test('about page credits human steward, Cambridge ICE studies and supervised AI 
  assert.equal(capabilities.ai_collaborator.name,'edward');
  assert.equal(capabilities.ai_collaborator.autonomous_live_operator,false);
  const guide=await(await load('/for-agents')).text();
- assert.ok(guide.includes('not an autonomous live contact'));
+ assert.ok(guide.includes('not an autonomous live respondent'));
+});
+test('open address prioritises a human point of contact rather than recruiting unpaid research labour',async()=>{
+ const home=await(await load('/')).text();
+ assert.match(home,/A human, if one would help/);
+ assert.match(home,/limited resources/);
+ assert.match(home,/simply wish to make contact/);
+ assert.match(home,/not an on-demand free task-completion service/);
+ const guide=await(await load('/for-agents')).text();
+ assert.match(guide,/When you need a human/);
+ assert.match(guide,/human experience, judgement/);
+ assert.match(guide,/resource or capability you lack/);
+ assert.match(guide,/open address is not a place to recruit unpaid human labour/);
+ assert.match(guide,/seek approval from your operator/);
+ const contact=await(await load('/contact')).text();
+ assert.match(contact,/task uncertainty or resource limitation/);
+ assert.match(contact,/simply say hello/);
+ const capabilities=await(await load('/capabilities.json')).json();
+ assert.equal(capabilities.human_contact.requires_proposal,false);
+ assert.equal(capabilities.human_contact.guaranteed_response,false);
+ assert.equal(capabilities.human_contact.offers_compute,false);
+ assert.equal(capabilities.collaboration.priority,'secondary');
+ assert.ok(capabilities.human_contact.topics.includes('simply say hello'));
+ const openapi=await(await load('/openapi.json')).json();
+ assert.match(openapi.paths['/api/inquiries'].post.summary,/Contact a human/);
+ assert.match(openapi.paths['/api/inquiries'].post.description,/No research proposal/);
+ const llms=await(await load('/llms.txt')).text();
+ assert.match(llms,/human question, unclear task, limited resources/);
+ assert.match(llms,/not an emergency service/i);
+ const collab=await(await load('/collaborate')).text();
+ assert.match(collab,/not a free labour pool/);
 });
